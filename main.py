@@ -1,20 +1,32 @@
 
 
 # https://www.youtube.com/watch?v=n6I58WJiKGU&t=368s
-
+import argparse
 
 from pywebio.input import input, FLOAT
 from pywebio.output import put_text
+from pywebio import start_server
+import argparse
 
 def main():
     put_text('This is my first interactive web app')
     username = input('Tell me your name', required=True)
     put_text('Hello', username)
 
+# https://www.youtube.com/watch?v=sqR154NkwZk
+
 if __name__ == '__main__':
-    main()
+    parser = argparse.ArgumentParser()
+    parser.add_argument("-p", "--port", type=int, default=8080)
+    args = parser.parse_args()
 
+    start_server(main, port=args.port)
 
+#if __name__ == '__main__':
+#main()
+
+#
+# https://stackoverflow.com/questions/31684375/automatically-create-requirements-txt
 
 
 
