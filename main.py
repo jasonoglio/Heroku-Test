@@ -47,15 +47,15 @@ def main():
 # https://www.youtube.com/watch?v=sqR154NkwZk
 
 # this section is for Heroku
-#if __name__ == '__main__':
-#    parser = argparse.ArgumentParser()
-#    parser.add_argument("-p", "--port", type=int, default=8080)
-#    args = parser.parse_args()
-#
-#    start_server(main, port=args.port)
-
 if __name__ == '__main__':
-    main()
+    parser = argparse.ArgumentParser()
+    parser.add_argument("-p", "--port", type=int, default=8080)
+    args = parser.parse_args()
+
+    start_server(main, port=args.port)
+
+#if __name__ == '__main__':
+#    main()
 
 #
 # https://stackoverflow.com/questions/31684375/automatically-create-requirements-txt
