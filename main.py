@@ -3,27 +3,59 @@
 # https://www.youtube.com/watch?v=n6I58WJiKGU&t=368s
 import argparse
 
-from pywebio.input import input, FLOAT
-from pywebio.output import put_text
+from pywebio import *
+from pywebio.input import *
+from pywebio.output import *
+import numpy as np
+import matplotlib.pyplot as plt
+import io
+from PIL import Image
 from pywebio import start_server
 import argparse
 
 def main():
     put_text('This is my first interactive web app')
-    username = input('Tell me your name', required=True)
-    put_text('Hello', username)
+    username = input('Tell me your name', required=True,
+                     help_text='write anything here, your data is not saved',
+                     placeholder='Your Name'
+                     )
+    put_markdown('# Hello %s' %username)
+
+
+
+    data = [1000, 1000, 5000, 3000, 4000, 16000, 2000]
+
+    plt.rcParams["figure.figsize"] = [7.50, 3.50]
+    plt.rcParams["figure.autolayout"] = True
+
+    plt.figure()
+    plt.plot([1, 2])
+
+    img_buf = io.BytesIO()
+    plt.savefig(img_buf, format='png')
+
+    im = Image.open(img_buf)
+    #im.show(title="My Image")
+
+    put_image(src=im)
+
+    img_buf.close()
+
+
+
 
 # https://www.youtube.com/watch?v=sqR154NkwZk
 
-if __name__ == '__main__':
-    parser = argparse.ArgumentParser()
-    parser.add_argument("-p", "--port", type=int, default=8080)
-    args = parser.parse_args()
-
-    start_server(main, port=args.port)
-
+# this section is for Heroku
 #if __name__ == '__main__':
-#main()
+#    parser = argparse.ArgumentParser()
+#    parser.add_argument("-p", "--port", type=int, default=8080)
+#    args = parser.parse_args()
+#
+#    start_server(main, port=args.port)
+
+if __name__ == '__main__':
+    main()
 
 #
 # https://stackoverflow.com/questions/31684375/automatically-create-requirements-txt
