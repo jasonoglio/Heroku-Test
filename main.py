@@ -247,6 +247,8 @@ def main():
             defend_reroll_count += 1
             defend_result_list.remove('hit')
 
+        defend_result_list = defend_result_list + defend_reroll_result_list
+
         defend_list_of_lists.append(defend_result_list)
 
         # reset all required variables to 0
