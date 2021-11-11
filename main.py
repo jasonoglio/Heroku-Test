@@ -150,8 +150,8 @@ def main():
     attack_reroll_result_list = []
     attack_list_of_lists = []
     attack_crit = 0
-    attack_rerolls_complete = 0
-    attack_number_of_dice_removed = 0
+    attack_reroll_count = 0
+
     roll_count = 20000
     pierce_count = 0
 
@@ -159,8 +159,8 @@ def main():
     defend_reroll_result_list = []
     defend_list_of_lists = []
     defend_crit = 0
-    defend_rerolls_complete = 0
-    defend_number_of_dice_removed = 0
+    defend_reroll_count = 0
+
 
     # required variables end -----------------------------------------------------
 
@@ -183,43 +183,17 @@ def main():
         # commented out because this was used to check the pierce ability
         # attack_copy = attack_result_list.copy()
 
-
-
-
-
-        # count total possible rerolls
-        attack_block_count = attack_result_list.count('block')
-        attack_blank_count = attack_result_list.count('blank')
-        attack_total_possible_re_roll = attack_blank_count + attack_block_count
-
-        # set actual reroll amount
-        if attack_total_possible_re_roll < attack_user_input_reroll:
-            attack_user_input_reroll = attack_total_possible_re_roll
-
-        # commented out because this is a variable for double checking reroll and crit
-        # attack_copy = attack_result_list.copy()
-
         # perform rerolls
-        while attack_rerolls_complete < attack_user_input_reroll:
+        while attack_reroll_count < attack_user_input_reroll and 'blank' in attack_result_list:
             attack_reroll_result_list.append(random.choice(roll))
-            attack_rerolls_complete += 1
-
-        # remove rerolled dice
-        while attack_block_count > 0 and attack_total_possible_re_roll > 0 and attack_user_input_reroll > 0:
-            attack_result_list.remove('block')
-            attack_block_count -= 1
-            attack_total_possible_re_roll -= 1
-            attack_number_of_dice_removed += 1
-            attack_user_input_reroll -= 1
-
-        while attack_blank_count > 0 and attack_total_possible_re_roll > 0 and attack_user_input_reroll > 0:
+            attack_reroll_count += 1
             attack_result_list.remove('blank')
-            attack_blank_count -= 1
-            attack_total_possible_re_roll -= 1
-            attack_number_of_dice_removed += 1
-            attack_user_input_reroll -= 1
 
-        # combine reroll list to original roll list which has had dice removed
+        while attack_reroll_count < attack_user_input_reroll and 'block' in attack_result_list:
+            attack_reroll_result_list.append(random.choice(roll))
+            attack_reroll_count += 1
+            attack_result_list.remove('block')
+
         attack_result_list = attack_result_list + attack_reroll_result_list
 
         ## SHORTER WAY OF CHECKING A LIST AND MODIFYING IT, use this code in other places
@@ -230,13 +204,10 @@ def main():
 
         # reset all required variables to 0
         attack_crit = 0
-        attack_rerolls_complete = 0
-        attack_number_of_dice_removed = 0
-        attack_block_count = 0
-        attack_blank_count = 0
         attack_result_list = []
         attack_reroll_result_list = []
         pierce_count = 0
+        attack_reroll_count = 0
 
         # SINGLE ATTACK ROLL DONE -------------------------------------------------
 
@@ -265,51 +236,25 @@ def main():
                 defend_result_list.remove('hit')
                 pierce_count += 1
 
-        # count total possible rerolls
-        defend_hit_count = defend_result_list.count('hit')
-        defend_blank_count = defend_result_list.count('blank')
-        defend_total_possible_re_roll = defend_blank_count + defend_hit_count
-
-        # set actual reroll amount
-        if defend_total_possible_re_roll < defend_user_input_reroll:
-            defend_user_input_reroll = defend_total_possible_re_roll
-
-        # commented out because this is a variable for double checking reroll and crit
-        # defend_copy = defend_result_list.copy()
-
         # perform rerolls
-        while defend_rerolls_complete < defend_user_input_reroll:
+        while defend_reroll_count < defend_user_input_reroll and 'blank' in defend_result_list:
             defend_reroll_result_list.append(random.choice(roll))
-            defend_rerolls_complete += 1
-
-        # remove rerolled dice
-        while defend_hit_count > 0 and defend_total_possible_re_roll > 0 and defend_user_input_reroll > 0:
-            defend_result_list.remove('hit')
-            defend_hit_count -= 1
-            defend_total_possible_re_roll -= 1
-            defend_number_of_dice_removed += 1
-            defend_user_input_reroll -= 1
-
-        while defend_blank_count > 0 and defend_total_possible_re_roll > 0 and defend_user_input_reroll > 0:
+            defend_reroll_count += 1
             defend_result_list.remove('blank')
-            defend_blank_count -= 1
-            defend_total_possible_re_roll -= 1
-            defend_number_of_dice_removed += 1
-            defend_user_input_reroll -= 1
 
-        # combine reroll list to original roll list which has had dice removed
-        defend_result_list = defend_result_list + defend_reroll_result_list
+        while defend_reroll_count < defend_user_input_reroll and 'block' in defend_result_list:
+            defend_reroll_result_list.append(random.choice(roll))
+            defend_reroll_count += 1
+            defend_result_list.remove('block')
 
         defend_list_of_lists.append(defend_result_list)
 
         # reset all required variables to 0
         defend_crit = 0
-        defend_rerolls_complete = 0
-        defend_number_of_dice_removed = 0
-        defend_hit_count = 0
-        defend_blank_count = 0
         defend_result_list = []
+        defend_reroll_count = 0
         defend_reroll_result_list = []
+
 
         # SINGLE DEFENSE ROLL DONE ------------------------------------------------
 
@@ -331,9 +276,6 @@ def main():
         attack_df['success count'] = attack_df['success count'] + attack_df.eq('failure').sum(axis=1)
 
     # powers that effect defense calculation --------------------------------------
-
-    # pierce added to individual roll for ease
-    # reduce damage power added in the end at success calculation
 
     defend_df['success count'] = defend_df.eq('crit').sum(axis=1) + defend_df.eq('wild').sum(axis=1) + defend_df.eq(
         'block').sum(axis=1)
