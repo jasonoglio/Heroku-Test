@@ -242,10 +242,10 @@ def main():
             defend_reroll_count += 1
             defend_result_list.remove('blank')
 
-        while defend_reroll_count < defend_user_input_reroll and 'block' in defend_result_list:
+        while defend_reroll_count < defend_user_input_reroll and 'hit' in defend_result_list:
             defend_reroll_result_list.append(random.choice(roll))
             defend_reroll_count += 1
-            defend_result_list.remove('block')
+            defend_result_list.remove('hit')
 
         defend_list_of_lists.append(defend_result_list)
 
