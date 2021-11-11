@@ -44,12 +44,22 @@ def main():
         radio(label='How many Dice can the Defender re-roll?', options=[0, 1, 2, 3, 'All'],
               required=True, name='defend_reroll'),
 
-        checkbox(options=['Remove wilds from attacker? (Are you attacking MODOK)',
+        checkbox(label='Defending model power dice mods.',
+                 options=['Remove wilds from attacker? (is MODOK defending)',
                           'Reduce damage by 1 to a minimum of 1? (Iron Man''s ability',
                           'Count blanks on defense? (Black Panthers ability)',
-                          'Pierce, change one hit, crit, or wild to blank'
-                          ], name='checkbox'),
+                          'Reduce damage by 1 with no minimum (Crossbones, Thanos)',
+                          'Count fails as success (Scarlet witch)',
 
+                          ], name='checkboxdefend'),
+
+        checkbox(label='Attacking model power dice mods.',
+                 options=['Pierce, change one hit, crit, or wild to blank',
+                          'Count blanks as success on attack roll (Corvus Glaive)',
+                          'Count fails as success (Scarlet Witch)',
+                          'Do not add dice for crit rolls (Scarlet Witch, Carnage)',
+                          'Do not count crits as success(Scarlet Witch)'
+                          ], name='checkboxattack')
 
     ])
 
@@ -67,25 +77,62 @@ def main():
 
     #print(user_inputs['checkbox'])
 
-    if 'Remove wilds from attacker? (Are you attacking MODOK)' in user_inputs['checkbox']:
+# defense power mods
+
+    if 'Remove wilds from attacker? (is MODOK defending)' in user_inputs['checkboxdefend']:
         modok = True
     else:
         modok = False
 
-    if 'Reduce damage by 1 to a minimum of 1? (Iron Man''s ability' in user_inputs['checkbox']:
+    if 'Reduce damage by 1 to a minimum of 1? (Iron Man''s ability' in user_inputs['checkboxdefend']:
         reduce_damage = True
     else:
         reduce_damage = False
 
-    if 'Count blanks on defense? (Black Panthers ability)' in user_inputs['checkbox']:
+    if 'Count blanks on defense? (Black Panthers ability)' in user_inputs['checkboxdefend']:
         defense_blanks_count = True
     else:
         defense_blanks_count = False
 
-    if 'Pierce, change one hit, crit, or wild to blank' in user_inputs['checkbox']:
+    if 'Count fails as success (Scarlet witch)' in user_inputs['checkboxdefend']:
+        defense_fails_count = True
+    else:
+        defense_fails_count = False
+
+    if 'Reduce damage by 1 with no minimum (Crossbones, Thanos)' in user_inputs['checkboxdefend']:
+        reduce_damage_no_min = True
+    else:
+        reduce_damage_no_min = False
+
+    if 'Do not add dice for crit rolls (Scarlet Witch, Carnage)' in user_inputs['checkboxattack']:
+        no_add_crit = True
+    else:
+        no_add_crit = False
+
+# attack power mods
+
+    if 'Pierce, change one hit, crit, or wild to blank' in user_inputs['checkboxattack']:
         pierce = True
     else:
         pierce = False
+
+    if 'Count blanks as success on attack roll (Corvus Glaive)' in user_inputs['checkboxattack']:
+        attack_blanks_count = True
+    else:
+        attack_blanks_count = False
+
+    if 'Count fails as success (Scarlet Witch)' in user_inputs['checkboxattack']:
+        attack_fails_count = True
+    else:
+        attack_fails_count = False
+
+    if 'Do not count crits as success(Scarlet Witch)' in user_inputs['checkboxattack']:
+        no_count_crit = True
+    else:
+        no_count_crit = False
+
+
+
 
 
     ### VARIABLES SET PROCESS CODE STARTS HERE
@@ -122,28 +169,23 @@ def main():
         for i in range(attack_user_input_roll):
             attack_result_list.append(random.choice(roll))
 
+
         # count crits
         for i in attack_result_list:
             if i == 'crit':
                 attack_crit += 1
 
         # add rolls for crits
+
         for i in range(attack_crit):
             attack_result_list.append(random.choice(roll))
 
         # commented out because this was used to check the pierce ability
         # attack_copy = attack_result_list.copy()
 
-        if pierce == True and pierce_count == 0:
-            if 'wild' in attack_result_list:
-                attack_result_list.remove('wild')
-                pierce_count += 1
-            elif 'crit' in attack_result_list:
-                attack_result_list.remove('crit')
-                pierce_count += 1
-            elif 'hit' in attack_result_list:
-                attack_result_list.remove('hit')
-                pierce_count += 1
+
+
+
 
         # count total possible rerolls
         attack_block_count = attack_result_list.count('block')
@@ -180,6 +222,10 @@ def main():
         # combine reroll list to original roll list which has had dice removed
         attack_result_list = attack_result_list + attack_reroll_result_list
 
+        ## SHORTER WAY OF CHECKING A LIST AND MODIFYING IT, use this code in other places
+        while modok == True and 'wild' in attack_result_list:
+            attack_result_list.remove('wild')
+
         attack_list_of_lists.append(attack_result_list)
 
         # reset all required variables to 0
@@ -204,8 +250,20 @@ def main():
                 defend_crit += 1
 
         # add rolls for crits
-        for i in range(defend_crit):
-            defend_result_list.append(random.choice(roll))
+        if no_add_crit == False:
+            for i in range(defend_crit):
+                defend_result_list.append(random.choice(roll))
+
+        if pierce == True and pierce_count == 0:
+            if 'wild' in defend_result_list:
+                defend_result_list.remove('wild')
+                pierce_count += 1
+            elif 'crit' in defend_result_list:
+                defend_result_list.remove('crit')
+                pierce_count += 1
+            elif 'hit' in defend_result_list:
+                defend_result_list.remove('hit')
+                pierce_count += 1
 
         # count total possible rerolls
         defend_hit_count = defend_result_list.count('hit')
@@ -263,23 +321,31 @@ def main():
 
     # powers that effect attack calculation ---------------------------------------
 
-    if modok == True:
-        attack_df['success count'] = attack_df.eq('crit').sum(axis=1) + attack_df.eq('hit').sum(axis=1)
-    else:
-        attack_df['success count'] = attack_df.eq('crit').sum(axis=1) + attack_df.eq('hit').sum(axis=1) + attack_df.eq(
-            'wild').sum(axis=1)
+    attack_df['success count'] = attack_df.eq('crit').sum(axis=1) + attack_df.eq('hit').sum(axis=1) + attack_df.eq(
+        'wild').sum(axis=1)
+
+    if attack_blanks_count == True:
+        attack_df['success count'] = attack_df['success count'] + attack_df.eq('blank').sum(axis=1)
+
+    if attack_fails_count == True:
+        attack_df['success count'] = attack_df['success count'] + attack_df.eq('failure').sum(axis=1)
 
     # powers that effect defense calculation --------------------------------------
 
     # pierce added to individual roll for ease
     # reduce damage power added in the end at success calculation
 
+    defend_df['success count'] = defend_df.eq('crit').sum(axis=1) + defend_df.eq('wild').sum(axis=1) + defend_df.eq(
+        'block').sum(axis=1)
+
     if defense_blanks_count == True:
-        defend_df['success count'] = defend_df.eq('crit').sum(axis=1) + defend_df.eq('wild').sum(axis=1) + defend_df.eq(
-            'block').sum(axis=1) + defend_df.eq('blank').sum(axis=1)
-    else:
-        defend_df['success count'] = defend_df.eq('crit').sum(axis=1) + defend_df.eq('wild').sum(axis=1) + defend_df.eq(
-            'block').sum(axis=1)
+        defend_df['success count'] = defend_df['success count'] + defend_df.eq('blank').sum(axis=1)
+
+    if defense_fails_count == True:
+        defend_df['success count'] = defend_df['success count'] + defend_df.eq('failure').sum(axis=1)
+
+    if no_count_crit == True:
+        defend_df['success count'] = defend_df['success count'] - defend_df.eq('crit').sum(axis=1)
 
     # Comparison starts here ------------------------------------------------------
 
@@ -316,6 +382,10 @@ def main():
     if reduce_damage == True:
         comparison_df['hits through'][comparison_df['hits through'] > 1] = [comparison_df['hits through'] - 1]
 
+    # reduce magame power no min
+    if reduce_damage_no_min == True:
+        comparison_df['hits through'][comparison_df['hits through'] > 0] = [comparison_df['hits through'] - 1]
+
     comparison_df['hits through'][comparison_df['hits through'] < 0] = 0
 
     final_comparison_df = comparison_df['hits through'].value_counts().reset_index().values
@@ -324,13 +394,17 @@ def main():
     final_comparison_df = final_comparison_df.sort_values(by=['hits through'])
     # final_comparison_df['pareto'] = 100 * final_comparison_df['hits through count'].cumsum() / final_comparison_df['hits through count'].sum()
     final_comparison_df['percentage'] = 100 * final_comparison_df['hits through count'] / roll_count
+    final_comparison_df['percentage'] = final_comparison_df['percentage'].round(1)
 
     fig, final_comparison_df_ax = plt.subplots()
     ax1 = final_comparison_df.plot(x='hits through', y='hits through count', kind='bar', ax=final_comparison_df_ax)
-    ax2 = final_comparison_df.plot(x='hits through', y='percentage', marker='D', color='k', kind='line',
+    ax2 = final_comparison_df.plot(x='hits through', y='percentage', marker='D', color='C1', kind='line',
                                    ax=final_comparison_df_ax, secondary_y=True)
     ax2.set_ylim([0, 110, ])
     ax2.set_ylabel('percentage')
+
+    for a, b in zip(final_comparison_df['hits through'], final_comparison_df['percentage']):
+        plt.text(a, b, str(b), color='k')
 
     final_result_image = io.BytesIO()
     plt.savefig(final_result_image, format='png')
@@ -348,17 +422,35 @@ def main():
     put_text('attacker rolled' , attack_user_input_roll, 'dice. with', display_attack_user_input_reroll, 'possible re-rolls.')
     put_text('defender rolled', defend_user_input_roll, 'dice. with', display_defend_user_input_reroll, 'possible re-rolls.')
     put_text('Active dice mods are:')
-    put_text('defense counts blanks = ', defense_blanks_count)
-    put_text('attacking MODOK = ', modok)
-    put_text('reduce damage by 1 to a minimum of 1 = ', reduce_damage)
-    put_text('pierce = ', pierce)
+    if pierce == True:
+        put_text('pierce = ', pierce)
+    if modok == True:
+        put_text('attacking MODOK = ', modok)
+    if attack_blanks_count == True:
+        put_text('attack counts blanks = ', attack_blanks_count)
+    if attack_fails_count == True:
+         put_text('attack counts fails = ', attack_fails_count)
+    if defense_blanks_count == True:
+        put_text('defense counts blanks = ', defense_blanks_count)
+    if defense_fails_count == True:
+        put_text('defense counts fails = ', defense_fails_count)
+    if reduce_damage == True:
+        put_text('reduce damage by 1 to a minimum of 1 = ', reduce_damage)
+    if reduce_damage_no_min == True:
+        put_text('reduce damage by 1 no minimum = ', reduce_damage_no_min)
+    if no_add_crit == True:
+        put_text('Do not add dice for crit rolls = ', no_add_crit)
+    if no_count_crit == True:
+        put_text('do not count crits on defense = ', no_count_crit)
+
+
 
     put_text('Bar Chart showing distribution of attack dice outcomes.')
     put_image(src=im_a_final)
     put_text('Bar Chart showing distribution of defense dice outcomes.')
     put_image(src=im_d_final)
     put_text('Bar Chart showing distribution of opposing roll dice outcomes.')
-    put_text('The black line shows the % chance of each outcome using the right y axis.')
+    put_text('The yellow line shows the % chance of each outcome using the right y axis.')
     put_image(src=im_final)
 
     print('process complete')
