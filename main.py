@@ -225,16 +225,7 @@ def main():
             for i in range(defend_crit):
                 defend_result_list.append(random.choice(roll))
 
-        if pierce == True and pierce_count == 0:
-            if 'wild' in defend_result_list:
-                defend_result_list.remove('wild')
-                pierce_count += 1
-            elif 'crit' in defend_result_list:
-                defend_result_list.remove('crit')
-                pierce_count += 1
-            elif 'hit' in defend_result_list:
-                defend_result_list.remove('hit')
-                pierce_count += 1
+
 
         # perform rerolls
         while defend_reroll_count < defend_user_input_reroll and 'blank' in defend_result_list:
@@ -248,6 +239,20 @@ def main():
             defend_result_list.remove('hit')
 
         defend_result_list = defend_result_list + defend_reroll_result_list
+
+        if pierce == True and pierce_count == 0:
+            if 'wild' in defend_result_list:
+                defend_result_list.remove('wild')
+                defend_result_list.append('blank')
+                pierce_count += 1
+            elif 'crit' in defend_result_list:
+                defend_result_list.remove('crit')
+                defend_result_list.append('blank')
+                pierce_count += 1
+            elif 'hit' in defend_result_list:
+                defend_result_list.remove('hit')
+                defend_result_list.append('blank')
+                pierce_count += 1
 
         defend_list_of_lists.append(defend_result_list)
 
