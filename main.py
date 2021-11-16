@@ -50,7 +50,7 @@ def main():
                           'Count blanks on defense? (Black Panthers ability)',
                           'Reduce damage by 1 with no minimum (Crossbones, Thanos)',
                           'Count fails as success (Scarlet witch)',
-
+                          'Defender can reroll fails',
                           ], name='checkboxdefend'),
 
         checkbox(label='Attacking model power dice mods.',
@@ -58,7 +58,8 @@ def main():
                           'Count blanks as success on attack roll (Corvus Glaive)',
                           'Count fails as success (Scarlet Witch)',
                           'Do not add dice for crit rolls (Scarlet Witch, Carnage)',
-                          'Do not count crits as success(Scarlet Witch)'
+                          'Do not count crits as success(Scarlet Witch)',
+                          'Attacker can reroll fails'
                           ], name='checkboxattack')
 
     ])
@@ -104,10 +105,10 @@ def main():
     else:
         reduce_damage_no_min = False
 
-    if 'Do not add dice for crit rolls (Scarlet Witch, Carnage)' in user_inputs['checkboxattack']:
-        no_add_crit = True
+    if 'Defender can reroll fails' in user_inputs['checkboxdefend']:
+        d_reroll_fails = True
     else:
-        no_add_crit = False
+        d_reroll_fails = False
 
 # attack power mods
 
@@ -130,6 +131,16 @@ def main():
         no_count_crit = True
     else:
         no_count_crit = False
+
+    if 'Attacker can reroll fails' in user_inputs['checkboxattack']:
+        a_reroll_fails = True
+    else:
+        a_reroll_fails = False
+
+    if 'Do not add dice for crit rolls (Scarlet Witch, Carnage)' in user_inputs['checkboxattack']:
+        no_add_crit = True
+    else:
+        no_add_crit = False
 
 
 
@@ -184,6 +195,11 @@ def main():
         # attack_copy = attack_result_list.copy()
 
         # perform rerolls
+        while attack_reroll_count < attack_user_input_reroll and 'failure' in attack_result_list and a_reroll_fails == True:
+            attack_reroll_result_list.append(random.choice(roll))
+            attack_reroll_count += 1
+            attack_result_list.remove('failure')
+
         while attack_reroll_count < attack_user_input_reroll and 'blank' in attack_result_list:
             attack_reroll_result_list.append(random.choice(roll))
             attack_reroll_count += 1
@@ -228,6 +244,11 @@ def main():
 
 
         # perform rerolls
+        while defend_reroll_count < defend_user_input_reroll and 'failure' in defend_result_list and d_reroll_fails == True:
+            defend_reroll_result_list.append(random.choice(roll))
+            defend_reroll_count += 1
+            defend_result_list.remove('failure')
+
         while defend_reroll_count < defend_user_input_reroll and 'blank' in defend_result_list:
             defend_reroll_result_list.append(random.choice(roll))
             defend_reroll_count += 1
@@ -391,7 +412,10 @@ def main():
         put_text('Do not add dice for crit rolls = ', no_add_crit)
     if no_count_crit == True:
         put_text('do not count crits on defense = ', no_count_crit)
-
+    if a_reroll_fails == True:
+        put_text('attacker can reroll fails = ', a_reroll_fails)
+    if d_reroll_fails == True:
+        put_text('defender can reroll fails = ', d_reroll_fails)
 
 
     put_text('Bar Chart showing distribution of attack dice outcomes.')
