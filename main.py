@@ -428,6 +428,8 @@ def main():
 
     print('process complete')
     put_text('process complete')
+    put_text('for questions comments or requesting changes')
+    put_text('contact jasonoglio@gmail.com')
 
 
     
