@@ -46,11 +46,12 @@ def main():
 
         checkbox(label='Defending model power dice mods.',
                  options=['Remove wilds from attacker? (is MODOK defending)',
-                          'Reduce damage by 1 to a minimum of 1? (Iron Man''s ability',
+                          'Reduce damage by 1 to a minimum of 1? (Iron Man''s ability)',
                           'Count blanks on defense? (Black Panthers ability)',
                           'Reduce damage by 1 with no minimum (Crossbones, Thanos)',
                           'Count fails as success (Scarlet witch)',
                           'Defender can reroll fails',
+                          'Reality gem on defense',
                           ], name='checkboxdefend'),
 
         checkbox(label='Attacking model power dice mods.',
@@ -59,7 +60,8 @@ def main():
                           'Count fails as success (Scarlet Witch)',
                           'Do not add dice for crit rolls (Scarlet Witch, Carnage)',
                           'Do not count crits as success(Scarlet Witch)',
-                          'Attacker can reroll fails'
+                          'Attacker can reroll fails',
+                          'Reality gem on attack',
                           ], name='checkboxattack')
 
     ])
@@ -110,6 +112,11 @@ def main():
     else:
         d_reroll_fails = False
 
+    if 'Reality gem on defense' in user_inputs['checkboxdefend']:
+        d_reality = True
+    else:
+        d_reality = False
+
 # attack power mods
 
     if 'Pierce, change one hit, crit, or wild to blank' in user_inputs['checkboxattack']:
@@ -142,6 +149,10 @@ def main():
     else:
         no_add_crit = False
 
+    if 'Reality gem on attack' in user_inputs['checkboxattack']:
+        a_reality = True
+    else:
+        a_reality = False
 
 
 
@@ -163,6 +174,7 @@ def main():
     attack_crit = 0
     attack_reroll_count = 0
 
+
     roll_count = 20000
     pierce_count = 0
 
@@ -171,6 +183,7 @@ def main():
     defend_list_of_lists = []
     defend_crit = 0
     defend_reroll_count = 0
+
 
 
     # required variables end -----------------------------------------------------
@@ -185,6 +198,13 @@ def main():
         for i in attack_result_list:
             if i == 'crit':
                 attack_crit += 1
+        # reality gem
+        if a_reality == True and 'failure' in attack_result_list:
+            attack_crit += 1
+
+        if a_reality == True and 'failure' in attack_result_list:
+            attack_result_list.remove('failure')
+            attack_result_list.append('failure reality')
 
         # add rolls for crits
 
@@ -193,6 +213,9 @@ def main():
 
         # commented out because this was used to check the pierce ability
         # attack_copy = attack_result_list.copy()
+
+
+
 
         # perform rerolls
         while attack_reroll_count < attack_user_input_reroll and 'failure' in attack_result_list and a_reroll_fails == True:
@@ -212,7 +235,11 @@ def main():
 
         attack_result_list = attack_result_list + attack_reroll_result_list
 
-        ## SHORTER WAY OF CHECKING A LIST AND MODIFYING IT, use this code in other places
+        if 'failure reality' not in attack_result_list and 'failure' in attack_result_list:
+            attack_result_list.remove('failure')
+            attack_result_list.append('failure reality')
+
+            ## SHORTER WAY OF CHECKING A LIST AND MODIFYING IT, use this code in other places
         while modok == True and 'wild' in attack_result_list:
             attack_result_list.remove('wild')
 
@@ -225,6 +252,7 @@ def main():
         pierce_count = 0
         attack_reroll_count = 0
 
+
         # SINGLE ATTACK ROLL DONE -------------------------------------------------
 
         # original roll
@@ -235,6 +263,14 @@ def main():
         for i in defend_result_list:
             if i == 'crit':
                 defend_crit += 1
+        # reality gem
+        if d_reality == True and 'failure' in defend_result_list:
+            defend_crit += 1
+
+        if d_reality == True and 'failure' in defend_result_list:
+            defend_result_list.remove('failure')
+            defend_result_list.append('failure reality')
+
 
         # add rolls for crits
         if no_add_crit == False:
@@ -260,6 +296,9 @@ def main():
             defend_result_list.remove('hit')
 
         defend_result_list = defend_result_list + defend_reroll_result_list
+        if 'failure reality' not in defend_result_list and 'failure' in defend_result_list:
+            defend_result_list.remove('failure')
+            defend_result_list.append('failure reality')
 
         if pierce == True and pierce_count == 0:
             if 'wild' in defend_result_list:
@@ -284,6 +323,7 @@ def main():
         defend_reroll_result_list = []
 
 
+
         # SINGLE DEFENSE ROLL DONE ------------------------------------------------
 
     # LOOPS n times ---------------------------------------------------------------
@@ -297,6 +337,10 @@ def main():
     attack_df['success count'] = attack_df.eq('crit').sum(axis=1) + attack_df.eq('hit').sum(axis=1) + attack_df.eq(
         'wild').sum(axis=1)
 
+
+    if a_reality == True:
+        attack_df['success count'] = attack_df['success count'] + attack_df.eq('failure reality').sum(axis=1)
+
     if attack_blanks_count == True:
         attack_df['success count'] = attack_df['success count'] + attack_df.eq('blank').sum(axis=1)
 
@@ -307,6 +351,9 @@ def main():
 
     defend_df['success count'] = defend_df.eq('crit').sum(axis=1) + defend_df.eq('wild').sum(axis=1) + defend_df.eq(
         'block').sum(axis=1)
+
+    if d_reality == True:
+        defend_df['success count'] = defend_df['success count'] + defend_df.eq('failure reality').sum(axis=1)
 
     if defense_blanks_count == True:
         defend_df['success count'] = defend_df['success count'] + defend_df.eq('blank').sum(axis=1)
@@ -416,6 +463,10 @@ def main():
         put_text('attacker can reroll fails = ', a_reroll_fails)
     if d_reroll_fails == True:
         put_text('defender can reroll fails = ', d_reroll_fails)
+    if a_reality == True:
+        put_text('Reality gem on attack  = ', a_reality)
+    if d_reality == True:
+        put_text('Reality gem on defense  = ', d_reality)
 
 
     put_text('Bar Chart showing distribution of attack dice outcomes.')
