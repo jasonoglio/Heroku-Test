@@ -495,9 +495,7 @@ def main():
 
     
     put_html(
-        '<br>'
         '<a href="https://venmo.com/code?user_id=2476107391565824379&created=1643651982.598431&printed=1">My Venmo</a>'
-        '<br>'
         '<br>')
 
     put_text("Thanks Nick T. and Richard M. Gamora's super power is in the works!")
