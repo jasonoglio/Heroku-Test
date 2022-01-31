@@ -468,15 +468,7 @@ def main():
     if d_reality == True:
         put_text('Reality gem on defense  = ', d_reality)
 
-    put_text('If you like this tool and want to support my plastic habit Venmo me a Dollar!')
-
-    put_image('https://raw.githubusercontent.com/jasonoglio/Heroku-Test/main/IMG_0760.jpg', format=None, title='',
-              width='200px')
-    put_html(
-        '<br>'
-        '<a href="https://venmo.com/code?user_id=2476107391565824379&created=1643651982.598431&printed=1">My Venmo</a>'
-        '<br>'
-        '<br>')
+   
 
     put_text("Thanks Nick T. and Richard M. Gamora's super power is in the works!")
     put_text('Bar Chart showing distribution of attack dice outcomes.')
@@ -492,15 +484,12 @@ def main():
     put_text('for questions comments or requesting changes')
     put_text('contact jasonoglio@gmail.com')
     put_text('If you like this tool and want to support my plastic habit Venmo me a Dollar!')
-
-    
+    put_image('https://raw.githubusercontent.com/jasonoglio/Heroku-Test/main/IMG_0760.jpg', format=None, title='',
+              width='200px')
     put_html(
         '<a href="https://venmo.com/code?user_id=2476107391565824379&created=1643651982.598431&printed=1">My Venmo</a>'
         '<br>')
-
     put_text("Thanks Nick T. and Richard M. Gamora's super power is in the works!")
-
-
     
 
     #print(modok)
